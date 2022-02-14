@@ -1,0 +1,25 @@
+{
+	"name": "Parquet_ADLS_AzureDate",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_covid19workspace",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Date.parquet",
+				"folderPath": {
+					"value": "@concat('stagingarea/casesazuresql/',formatDateTime(utcnow(),'yyyy-MM-dd'))",
+					"type": "Expression"
+				},
+				"fileSystem": "workspace"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

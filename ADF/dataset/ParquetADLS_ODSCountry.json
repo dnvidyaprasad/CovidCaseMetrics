@@ -1,0 +1,55 @@
+{
+	"name": "ParquetADLS_ODSCountry",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_covid19workspace",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "country.parquet",
+				"folderPath": "ods",
+				"fileSystem": "workspace"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "CountryKey",
+				"type": "INT32"
+			},
+			{
+				"name": "Country",
+				"type": "UTF8"
+			},
+			{
+				"name": "CountryCode",
+				"type": "UTF8"
+			},
+			{
+				"name": "Latitude",
+				"type": "DECIMAL",
+				"precision": 10,
+				"scale": 5
+			},
+			{
+				"name": "Longitude",
+				"type": "DECIMAL",
+				"precision": 10,
+				"scale": 5
+			},
+			{
+				"name": "InsertedDT",
+				"type": "INT96"
+			},
+			{
+				"name": "UpdateDT",
+				"type": "INT96"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

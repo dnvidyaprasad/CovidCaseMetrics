@@ -1,0 +1,48 @@
+{
+	"name": "load_ODS_Country",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Parquet_ADLS_AzureCountry",
+						"type": "DatasetReference"
+					},
+					"name": "Country"
+				},
+				{
+					"dataset": {
+						"referenceName": "ParquetADLS_ODSCountry",
+						"type": "DatasetReference"
+					},
+					"name": "Target"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ParquetADLS_ODSCountry",
+						"type": "DatasetReference"
+					},
+					"name": "ODSCountryTarget"
+				}
+			],
+			"transformations": [
+				{
+					"name": "LookupTarget"
+				},
+				{
+					"name": "SurrogateKeycustomerkey"
+				},
+				{
+					"name": "DerivedColumn1"
+				},
+				{
+					"name": "Selectop"
+				}
+			],
+			"script": "source(output(\n\t\tCountryKey as integer,\n\t\tCountry as string,\n\t\tCountryCode as string,\n\t\tLatitude as decimal(10,5),\n\t\tLongitude as decimal(10,5),\n\t\tInsertedDT as timestamp,\n\t\tUpdateDT as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'parquet') ~> Country\nsource(output(\n\t\tCountryKey as integer,\n\t\tCountry as string,\n\t\tCountryCode as string,\n\t\tLatitude as decimal(10,5),\n\t\tLongitude as decimal(10,5),\n\t\tInsertedDT as timestamp,\n\t\tUpdateDT as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'parquet') ~> Target\nCountry, Target lookup(Country@CountryCode == Target@CountryCode,\n\tmultiple: false,\n\tpickup: 'first',\n\tasc(CountryCode, true),\n\tbroadcast: 'auto')~> LookupTarget\nSelectop keyGenerate(output(CountryKey as long),\n\tstartAt: 1L) ~> SurrogateKeycustomerkey\nLookupTarget derive(output_CountryKey = Target@CountryKey,\n\t\toutput_Country = iif(Country@Country== \"\",Target@Country,Country@Country),\n\t\toutput_countrycode = iif(Country@CountryCode==\"\",Target@CountryCode,Country@CountryCode),\n\t\toutput_Latitude = iif(Country@Latitude==0,Target@Latitude,Country@Latitude),\n\t\toutput_Longitude = iif(Country@Longitude==0,Target@Longitude,Country@Longitude),\n\t\toutput_InsertedDT = iif(isNull(Target@CountryCode),currentTimestamp(),Target@InsertedDT),\n\t\toutput_UpdateDT = iif(Country@Country!=Target@Country || Country@Latitude != Target@Latitude || Country@Longitude !=Target@Longitude, currentTimestamp(),Target@UpdateDT)) ~> DerivedColumn1\nDerivedColumn1 select(mapColumn(\n\t\tCountry = output_Country,\n\t\tCountryCode = output_countrycode,\n\t\tLatitude = output_Latitude,\n\t\tLongitude = output_Longitude,\n\t\tCountryKey = Target@CountryKey,\n\t\tInsertedDT = output_InsertedDT,\n\t\tUpdateDT = output_UpdateDT\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Selectop\nSurrogateKeycustomerkey sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tCountryKey as integer,\n\t\tCountry as string,\n\t\tCountryCode as string,\n\t\tLatitude as decimal(10,5),\n\t\tLongitude as decimal(10,5),\n\t\tInsertedDT as timestamp,\n\t\tUpdateDT as timestamp\n\t),\n\tformat: 'parquet',\n\tpartitionFileNames:['country.parquet'],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tCountryKey,\n\t\tCountry,\n\t\tCountryCode,\n\t\tLatitude,\n\t\tLongitude,\n\t\tInsertedDT,\n\t\tUpdateDT\n\t),\n\tpartitionBy('hash', 1)) ~> ODSCountryTarget"
+		}
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"name": "ParquetADLS_ODSCaseMetrics",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_covid19workspace",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "CaseMetrics.parquet",
+				"folderPath": "ods/CaseMetrics",
+				"fileSystem": "workspace"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

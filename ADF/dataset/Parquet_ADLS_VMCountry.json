@@ -1,0 +1,46 @@
+{
+	"name": "Parquet_ADLS_VMCountry",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS_covid19workspace",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "country.parquet",
+				"folderPath": {
+					"value": "@concat('stagingarea/casesonpremsql/',formatDateTime(utcnow(),'yyyy-MM-dd'))",
+					"type": "Expression"
+				},
+				"fileSystem": "workspace"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "Country",
+				"type": "UTF8"
+			},
+			{
+				"name": "CountryCode",
+				"type": "UTF8"
+			},
+			{
+				"name": "Latitude",
+				"type": "DECIMAL",
+				"precision": 10,
+				"scale": 5
+			},
+			{
+				"name": "Longitude",
+				"type": "DECIMAL",
+				"precision": 10,
+				"scale": 5
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

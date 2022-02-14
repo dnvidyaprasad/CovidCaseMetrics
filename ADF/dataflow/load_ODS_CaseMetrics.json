@@ -1,0 +1,64 @@
+{
+	"name": "load_ODS_CaseMetrics",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Parquet_ADLS_AzureCaseMetrics",
+						"type": "DatasetReference"
+					},
+					"name": "AzureCovid19Metrics"
+				},
+				{
+					"dataset": {
+						"referenceName": "Parquet_ADLS_VMCaseMetrics",
+						"type": "DatasetReference"
+					},
+					"name": "VMcovid19Metrics"
+				},
+				{
+					"dataset": {
+						"referenceName": "ParquetADLS_ODSCountry",
+						"type": "DatasetReference"
+					},
+					"name": "Country"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ParquetADLS_ODSCaseMetrics",
+						"type": "DatasetReference"
+					},
+					"name": "ODSCovid19MetricTarget"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Union"
+				},
+				{
+					"name": "LookupCountry"
+				},
+				{
+					"name": "DerivedAudit"
+				},
+				{
+					"name": "SelectOutput"
+				},
+				{
+					"name": "FilterCurrentDay"
+				},
+				{
+					"name": "DerivedColumnSource"
+				},
+				{
+					"name": "DerivedColumnSourceAM"
+				}
+			],
+			"script": "source(output(\n\t\tID as integer,\n\t\tUpdated as date,\n\t\tConfirmed as integer,\n\t\tConfirmed_Change as integer,\n\t\tDeaths as integer,\n\t\tDeaths_Change as integer,\n\t\tRecovered as integer,\n\t\tRecovered_Change as integer,\n\t\tLatitude as decimal(10,5),\n\t\tLongitude as decimal(10,5),\n\t\tISO2 as string,\n\t\tISO3 as string,\n\t\tCountry_Region as string,\n\t\tload_time as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'parquet') ~> AzureCovid19Metrics\nsource(output(\n\t\tID as integer,\n\t\tUpdated as date,\n\t\tConfirmed as integer,\n\t\tConfirmed_Change as integer,\n\t\tDeaths as integer,\n\t\tDeaths_Change as integer,\n\t\tRecovered as integer,\n\t\tRecovered_Change as integer,\n\t\tLatitude as decimal(10,5),\n\t\tLongitude as decimal(10,5),\n\t\tISO2 as string,\n\t\tISO3 as string,\n\t\tCountry_Region as string,\n\t\tload_time as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'parquet') ~> VMcovid19Metrics\nsource(output(\n\t\tCountryKey as integer,\n\t\tCountry as string,\n\t\tCountryCode as string,\n\t\tLatitude as decimal(10,5),\n\t\tLongitude as decimal(10,5),\n\t\tInsertedDT as timestamp,\n\t\tUpdateDT as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'parquet') ~> Country\nDerivedColumnSource, DerivedColumnSourceAM union(byName: true)~> Union\nFilterCurrentDay, Country lookup(ISO3 == CountryCode,\n\tmultiple: false,\n\tpickup: 'first',\n\tasc(CountryCode, true),\n\tbroadcast: 'auto')~> LookupCountry\nLookupCountry derive(InsertDT = currentDate(),\n\t\tDateKey = concat(toString(year(Updated)),lpad(toString(month(Updated)),2,\"0\"),lpad(toString(dayOfMonth(Updated)),2,\"0\"))) ~> DerivedAudit\nDerivedAudit select(mapColumn(\n\t\tDateKey,\n\t\tCountryKey,\n\t\tID,\n\t\tConfirmed,\n\t\tConfirmed_Change,\n\t\tDeaths,\n\t\tDeaths_Change,\n\t\tRecovered,\n\t\tRecovered_Change,\n\t\tInsertDT,\n\t\tSource\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectOutput\nUnion filter(Updated >=  toDate(currentTimestamp())) ~> FilterCurrentDay\nAzureCovid19Metrics derive(Source = \"Azure SQL\") ~> DerivedColumnSource\nVMcovid19Metrics derive(Source = \"SQL VM\") ~> DerivedColumnSourceAM\nSelectOutput sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tpartitionFileNames:[(concat(\"CaseMetrics\", toString(toDate(toString(currentTimestamp()),\"yyyy-MM-dd\")) , \".parquet\"))],\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 1)) ~> ODSCovid19MetricTarget"
+		}
+	}
+}

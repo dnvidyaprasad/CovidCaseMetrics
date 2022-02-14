@@ -1,0 +1,110 @@
+{
+	"name": "Load_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute load STg CosmosDB",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute load Azure",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "load_STG_CosmosDB",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute load Azure",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute load Stg VM",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "load_STG_AzureSQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute load Stg VM",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "load_STG_VMAzure",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute load ODS",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute load STg CosmosDB",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Load_ODS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "load DWH synapse",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Execute load ODS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[DailyDWHLoad]"
+				},
+				"linkedServiceName": {
+					"referenceName": "linkedService_Synapse",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-02-12T07:47:40Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
