@@ -2,7 +2,7 @@
 	"name": "14 DSQL load DW SP",
 	"properties": {
 		"content": {
-			"query": "CREATE PROCEDURE [dbo].[DailyDWHLoad] AS\nBEGIN\n    INSERT INTO [dbo].[factCovidCases]\n    select * from vwCovidCases\n    where Datekey =  convert(nvarchar(MAX), GETDATE(), 112)\n\nEND",
+			"query": "CREATE PROCEDURE [dbo].[DailyDWHLoad] AS\nBEGIN\n    \n    DELETE FROM [dbo].[factCovidCases]\n    where Datekey =  convert(nvarchar(MAX), GETDATE(), 112)\n\n    INSERT INTO [dbo].[factCovidCases]\n    select * from vwCovidCases\n    where Datekey =  convert(nvarchar(MAX), GETDATE(), 112)\n\nEND",
 			"metadata": {
 				"language": "sql"
 			},
