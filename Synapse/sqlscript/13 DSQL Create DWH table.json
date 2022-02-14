@@ -1,0 +1,17 @@
+{
+	"name": "13 DSQL Create DWH table",
+	"properties": {
+		"content": {
+			"query": "CREATE TABLE [dbo].[DimDate]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [dbo].[odsdate]\nOPTION (LABEL = 'odsdate')\n;\n\nCREATE TABLE [dbo].[DimCountry]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [dbo].[odsCountry]\nOPTION (LABEL = 'odsCountry')\n;\n\n\nCREATE TABLE [dbo].[factCovidCases]\nWITH\n(\n    DISTRIBUTION = HASH([CountryKey]),\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [dbo].[vwCovidCases]\nOPTION (LABEL = 'vwCovidCases')\n;\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "covid19g6",
+				"poolName": "covid19g6"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

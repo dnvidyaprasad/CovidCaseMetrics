@@ -1,0 +1,17 @@
+{
+	"name": "1 Extername Table creation",
+	"properties": {
+		"content": {
+			"query": "CREATE DATABASE [COVID19G6]\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Password.1!!';\nCREATE DATABASE SCOPED CREDENTIAL SasToken\nWITH IDENTITY='SHARED ACCESS SIGNATURE'\n, SECRET = 'sp=r&st=2022-02-08T21:37:09Z&se=2022-02-09T05:37:09Z&spr=https&sv=2020-08-04&sr=c&sig=y7QSK2oC30%2BZqzu%2BqROfo9KoN%2FYvoAdGU9tTH1EneDc%3D';\n\nCREATE EXTERNAL DATA SOURCE dwh\nWITH (    LOCATION   = 'https://covid192zdzq2edqrlv2.dfs.core.windows.net',\n          CREDENTIAL = SasToken\n)\n\nCREATE EXTERNAL FILE FORMAT parquetfile  \nWITH (  \n    FORMAT_TYPE = PARQUET,  \n    DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'  \n);\n\n\nDROP EXTERNAL TABLE [odsCountry]\nCREATE EXTERNAL TABLE [odsCountry]\n(\n    [CountryKey] Int,\n    [Country] [varchar](200) ,\n\t[CountryCode] [varchar](200) ,\n\t[Latitude] [varchar](100) ,\n\t[Longitude] [varchar](100)\n)\nWITH (\n LOCATION = '/workspace/ods/country.parquet',\n    DATA_SOURCE = dwh,  \n    FILE_FORMAT = parquetfile\n)\n\nDROP EXTERNAL TABLE [odsPolicy]\nCREATE EXTERNAL TABLE [odsPolicy]\n(\n    [DateKey] [varchar](100)  ,\n    [CountryKey] [varchar](100)  ,\n\t[C1_Schoolclosing] [varchar](100) \n)\nWITH (\n LOCATION = '/workspace/ods/policy/policy20211231.parquet',\n    DATA_SOURCE = dwh,  \n    FILE_FORMAT = parquetfile\n)\n\nDROP EXTERNAL TABLE [odsCaseMetrics]\nCREATE EXTERNAL TABLE [odsCaseMetrics]\n(\n    [DateKey] [varchar](100)  ,\n    [CountryKey] [varchar](100)  ,\n\t[C1_Schoolclosing] [varchar](100) \n)\nWITH (\n LOCATION = 'workspace/stagingarea/casesonpremsql/covid19metric.parquet',\n    DATA_SOURCE = dwh,  \n    FILE_FORMAT = parquetfile\n)\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "COVID19G6",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

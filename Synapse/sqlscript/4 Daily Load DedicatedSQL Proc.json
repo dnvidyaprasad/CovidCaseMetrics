@@ -1,0 +1,17 @@
+{
+	"name": "4 Daily Load DedicatedSQL Proc",
+	"properties": {
+		"content": {
+			"query": "CREATE PROCEDURE [dbo].[DailyDWHLoad] AS\nBEGIN\n    INSERT INTO [dbo].[factCovidCases]\n    select * from vwCovidCases\n    where Datekey =  convert(nvarchar(MAX), GETDATE(), 112)\n\nEND",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "COVID19G6",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

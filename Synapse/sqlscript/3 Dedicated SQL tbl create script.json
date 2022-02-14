@@ -1,0 +1,17 @@
+{
+	"name": "3 Dedicated SQL tbl create script",
+	"properties": {
+		"content": {
+			"query": "CREATE TABLE [dbo].[DimDate]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [dbo].[odsdate]\nOPTION (LABEL = 'odsdate')\n;\n\nCREATE TABLE [dbo].[DimCountry]\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [dbo].[odsCountry]\nOPTION (LABEL = 'odsCountry')\n;\n\n\nCREATE TABLE [dbo].[factCovidCases]\nWITH\n(\n    DISTRIBUTION = HASH([CountryKey]),\n    CLUSTERED COLUMNSTORE INDEX\n)\nAS\nSELECT * FROM [dbo].[vwCovidCases]\nOPTION (LABEL = 'vwCovidCases')\n;\n\n\n\nCREATE TABLE [wwi].[fact_Sale]\n(\n    [Sale Key] [bigint] IDENTITY(1,1) NOT NULL,\n    [City Key] [int] NOT NULL,\n    [Customer Key] [int] NOT NULL,\n    [Bill To Customer Key] [int] NOT NULL,\n    [Lineage Key] [int] NOT NULL\n)\nWITH\n(\n    DISTRIBUTION = HASH ( [WWI Invoice ID] ),\n    CLUSTERED COLUMNSTORE INDEX\n)",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "COVID19G6",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

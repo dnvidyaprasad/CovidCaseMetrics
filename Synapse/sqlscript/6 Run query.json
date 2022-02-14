@@ -1,0 +1,17 @@
+{
+	"name": "6 Run query",
+	"properties": {
+		"content": {
+			"query": "\nSELECT * from odsCountry\nSELECT count(distinct CountryKey) from odsPolicy\n\nSELECT * from odsPolicy\nwhere c1_schoolclosing=1\n\nSELECT datekey, count(*)\n from odsPolicy\n group by datekey\n order by 1",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "COVID19G6",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
